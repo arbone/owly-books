@@ -15,6 +15,8 @@ Owly Books è una web app didattica che permette di cercare libri per categoria 
 - dettaglio dell’opera con descrizione, data e argomenti;
 - stati di caricamento, errore e nessun risultato;
 - interfaccia responsive e accessibile da tastiera;
+- caricamento progressivo dei risultati con paginazione `limit`/`offset` e pulsante “Mostra altri”;
+- deduplica dei risultati tra pagine successive;
 - annullamento delle richieste precedenti quando parte una nuova ricerca.
 
 ## Architettura
@@ -62,7 +64,7 @@ npm run build
 
 I test verificano la trasformazione dei dati dell'Adapter, la gestione degli errori e i principali stati della UI.
 
-La suite include 11 casi: adattamento dei risultati, descrizioni testuali/strutturate/assenti, dettaglio e identificativi, errore HTTP, rendering, risultati vuoti, errore di rete, fallback del dettaglio, escaping HTML e risultati obsoleti. GitHub Actions esegue test e build a ogni push e pull request. I test simulano la rete, quindi non richiedono la disponibilità del servizio esterno.
+La suite include 15 casi: adattamento dei risultati, descrizioni testuali/strutturate/assenti, dettaglio e identificativi, errore HTTP, rendering, risultati vuoti, errore di rete, fallback del dettaglio, escaping HTML, risultati obsoleti, paginazione, append dei risultati, deduplica e fine catalogo. GitHub Actions esegue test e build a ogni push e pull request. I test simulano la rete, quindi non richiedono la disponibilità del servizio esterno.
 
 ## API utilizzate
 
@@ -76,7 +78,7 @@ Le richieste JSON passano da `/open-library`: Vite le inoltra durante lo svilupp
 
 ### Limiti del catalogo
 
-La ricerca riguarda soggetti bibliografici, non titoli o autori. Usa categorie in inglese come `fantasy`, `animals`, `science` o `science fiction`. Mostra fino a 12 risultati senza paginazione. Le descrizioni mantengono la lingua originale e non vengono tradotte. Il catalogo non è filtrato per età: questo prototipo non sostituisce la selezione dei contenuti da parte di insegnanti o genitori.
+La ricerca riguarda soggetti bibliografici, non titoli o autori. Usa categorie in inglese come `fantasy`, `animals`, `science` o `science fiction`. Carica 12 risultati alla volta e consente di continuare a esplorare la categoria con “Mostra altri”, usando `limit` e `offset` fino all’esaurimento dei risultati disponibili. Le descrizioni mantengono la lingua originale e non vengono tradotte. Il catalogo non è filtrato per età: questo prototipo non sostituisce la selezione dei contenuti da parte di insegnanti o genitori.
 
 La UI usa un dialog nativo, etichetta del campo, area live per gli stati, collegamento per saltare ai risultati e preferenza di riduzione del movimento. Queste scelte non costituiscono una certificazione di accessibilità.
 
