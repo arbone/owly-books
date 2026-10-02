@@ -4,8 +4,9 @@ Owly Books è una web app didattica che permette di cercare libri per categoria 
 
 ## Demo e repository
 
-- **Demo Vercel:** da inserire dopo il deploy
-- **Repository GitHub:** da inserire dopo la pubblicazione
+- **Repository GitHub:** [arbone/owly-books](https://github.com/arbone/owly-books)
+- **Demo Vercel:** deploy ancora da completare. La sessione Vercel necessita di rinnovo e il sandbox non ha consentito di salvarla. Non esiste ancora un URL demo verificato.
+- **Presentazione:** [PDF di 6 slide](outputs/Owly-Books-presentazione.pdf) e [testi con note relatore](outputs/Presentazione-Owly-Books.md).
 
 ## Funzionalità
 
@@ -43,7 +44,7 @@ L'`OpenLibraryAdapter` nasconde i dettagli delle API esterne e restituisce ogget
 
 ## Avvio locale
 
-Richiede Node.js 20 o successivo.
+Richiede Node.js 22.12+ (consigliato Node 22 LTS), oppure 20.19+.
 
 ```bash
 npm install
@@ -61,6 +62,8 @@ npm run build
 
 I test verificano la trasformazione dei dati dell'Adapter, la gestione degli errori e i principali stati della UI.
 
+La suite include 11 casi: adattamento dei risultati, descrizioni testuali/strutturate/assenti, dettaglio e identificativi, errore HTTP, rendering, risultati vuoti, errore di rete, fallback del dettaglio, escaping HTML e risultati obsoleti. GitHub Actions esegue test e build a ogni push e pull request. I test simulano la rete, quindi non richiedono la disponibilità del servizio esterno.
+
 ## API utilizzate
 
 - Ricerca per soggetto: `https://openlibrary.org/subjects/{subject}.json`
@@ -69,6 +72,14 @@ I test verificano la trasformazione dei dati dell'Adapter, la gestione degli err
 
 Open Library può non fornire descrizione, autore o copertina per alcuni record. La UI gestisce questi casi con testi e immagini sostitutive.
 
+Le richieste JSON passano da `/open-library`: Vite le inoltra durante lo sviluppo e Vercel applica le rewrite dichiarate in `vercel.json`. Non servono chiavi API. Le copertine arrivano direttamente dal servizio Covers. Per una verifica completa locale usa `npm run dev`; `npm run preview` serve la build statica e non riproduce le rewrite di Vercel.
+
+### Limiti del catalogo
+
+La ricerca riguarda soggetti bibliografici, non titoli o autori. Usa categorie in inglese come `fantasy`, `animals`, `science` o `science fiction`. Mostra fino a 12 risultati senza paginazione. Le descrizioni mantengono la lingua originale e non vengono tradotte. Il catalogo non è filtrato per età: questo prototipo non sostituisce la selezione dei contenuti da parte di insegnanti o genitori.
+
+La UI usa un dialog nativo, etichetta del campo, area live per gli stati, collegamento per saltare ai risultati e preferenza di riduzione del movimento. Queste scelte non costituiscono una certificazione di accessibilità.
+
 ## Deploy su Vercel
 
 Il progetto usa la configurazione standard di Vite:
@@ -76,6 +87,8 @@ Il progetto usa la configurazione standard di Vite:
 - build command: `npm run build`;
 - output directory: `dist`;
 - install command: `npm install`.
+
+Per completare la pubblicazione, accedi a Vercel e importa `arbone/owly-books`, oppure esegui `vercel login` e `vercel --prod` dalla cartella del progetto. Dopo il deploy verifica una ricerca e un dettaglio, poi inserisci l'URL definitivo nel README e nella presentazione. Non commettere token o la directory `.vercel`.
 
 ## Licenza
 

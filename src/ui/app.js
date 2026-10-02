@@ -55,6 +55,7 @@ export function createApp(root, adapter) {
             <span>Prova:</span>
             ${POPULAR_SUBJECTS.map((subject) => `<button type="button" data-subject="${subject}">${subject}</button>`).join('')}
           </div>
+          <p class="search-help">Usa categorie in inglese. I testi provengono dal catalogo aperto di Open Library e non sono filtrati per età.</p>
         </div>
         <div class="hero-art" aria-hidden="true">
           <div class="moon"></div>

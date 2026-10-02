@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://openlibrary.org';
+const API_BASE_URL = '/open-library';
 
 function normalizeDescription(description) {
   if (typeof description === 'string') return description.trim();
@@ -7,7 +7,7 @@ function normalizeDescription(description) {
 }
 
 export class OpenLibraryAdapter {
-  constructor(fetchClient = fetch) {
+  constructor(fetchClient = (...args) => fetch(...args)) {
     this.fetchClient = fetchClient;
   }
 

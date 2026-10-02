@@ -48,6 +48,7 @@ h1 { max-width: 720px; margin: 0; font-size: clamp(2.8rem, 6vw, 5rem); line-heig
 .suggestions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: 1rem; color: var(--muted); font-size: .85rem; }
 .suggestions button { padding: .34rem .66rem; color: var(--forest); background: transparent; border: 1px solid #b9c9bd; border-radius: 999px; }
 .suggestions button:hover { background: var(--mint); }
+.search-help { font-size: .8rem; line-height: 1.5; color: #465853; max-width: 540px; }
 
 .hero-art { position: relative; min-height: 360px; }
 .moon { position: absolute; width: 330px; height: 330px; top: 5px; left: 40px; background: var(--mint); border-radius: 50%; }
