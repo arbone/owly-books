@@ -6,7 +6,7 @@ Owly Books è una web app didattica che permette di cercare libri per categoria 
 
 - **Repository GitHub:** [arbone/owly-books](https://github.com/arbone/owly-books)
 - **Demo Vercel:** [owly-books.vercel.app](https://owly-books.vercel.app)
-- **Presentazione:** [PDF di 6 slide](outputs/Owly-Books-presentazione.pdf) e [testi con note relatore](outputs/Presentazione-Owly-Books.md).
+- **Presentazione:** [PDF di 6 slide](outputs/Progetto%20JavaScript%20Advanced%20di%20Arbi%20Shehu.pdf) e [testi con note relatore](outputs/Presentazione-Owly-Books.md).
 
 ## Funzionalità
 
