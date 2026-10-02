@@ -1,4 +1,5 @@
 const POPULAR_SUBJECTS = ['fantasy', 'adventure', 'animals', 'science'];
+const PAGE_SIZE = 12;
 
 function escapeHtml(value = '') {
   const element = document.createElement('div');
@@ -30,6 +31,12 @@ function bookCard(book, adapter) {
 export function createApp(root, adapter) {
   let activeSearchController;
   let activeDetailController;
+  let currentQuery = '';
+  let nextOffset = 0;
+  let totalResults = null;
+  let loadedBooks = [];
+  let seenBookIds = new Set();
+  let isLoadingMore = false;
 
   root.innerHTML = `
     <header class="site-header">
@@ -80,6 +87,10 @@ export function createApp(root, adapter) {
           <p>Scrivi un argomento o scegli uno dei suggerimenti.</p>
         </div>
         <div id="books" class="books-grid" hidden></div>
+        <div id="pagination" class="pagination" hidden>
+          <button id="load-more" class="load-more-button" type="button">Mostra altri libri</button>
+          <p id="pagination-status" class="pagination-status" aria-live="polite"></p>
+        </div>
       </section>
     </main>
 
@@ -97,16 +108,59 @@ export function createApp(root, adapter) {
   const status = root.querySelector('#status');
   const resultCount = root.querySelector('#result-count');
   const title = root.querySelector('#results-title');
+  const pagination = root.querySelector('#pagination');
+  const loadMoreButton = root.querySelector('#load-more');
+  const paginationStatus = root.querySelector('#pagination-status');
   const dialog = root.querySelector('#book-dialog');
   const dialogContent = root.querySelector('#dialog-content');
 
   function setStatus(kind, message) {
     booksContainer.hidden = true;
+    pagination.hidden = true;
     status.hidden = false;
     status.className = `status-panel ${kind}`;
     status.innerHTML = kind === 'loading'
       ? `<span class="loader" aria-hidden="true"></span><p>${escapeHtml(message)}</p>`
       : `<span class="status-icon" aria-hidden="true">${kind === 'error' ? '!' : '⌁'}</span><p>${escapeHtml(message)}</p>`;
+  }
+
+  function updateResultCount() {
+    const loaded = loadedBooks.length;
+    if (totalResults !== null) {
+      resultCount.textContent = `${loaded} di ${totalResults} ${totalResults === 1 ? 'libro' : 'libri'}`;
+      return;
+    }
+    resultCount.textContent = `${loaded} ${loaded === 1 ? 'libro' : 'libri'} caricati`;
+  }
+
+  function appendBooks(books) {
+    const newBooks = books.filter((book) => {
+      if (!book.id || seenBookIds.has(book.id)) return false;
+      seenBookIds.add(book.id);
+      return true;
+    });
+
+    loadedBooks.push(...newBooks);
+    booksContainer.insertAdjacentHTML(
+      'beforeend',
+      newBooks.map((book) => bookCard(book, adapter)).join(''),
+    );
+
+    return newBooks.length;
+  }
+
+  function updatePagination(lastBatchSize) {
+    const reachedKnownTotal = totalResults !== null && nextOffset >= totalResults;
+    const reachedUnknownEnd = totalResults === null && lastBatchSize < PAGE_SIZE;
+    const hasMore = lastBatchSize > 0 && !reachedKnownTotal && !reachedUnknownEnd;
+
+    pagination.hidden = !hasMore;
+    loadMoreButton.disabled = false;
+    loadMoreButton.textContent = 'Mostra altri libri';
+
+    if (!hasMore && loadedBooks.length) {
+      paginationStatus.textContent = 'Hai raggiunto la fine dei risultati disponibili.';
+    }
   }
 
   async function search(subject) {
@@ -116,25 +170,97 @@ export function createApp(root, adapter) {
     activeSearchController?.abort();
     activeSearchController = new AbortController();
     const controller = activeSearchController;
+
+    currentQuery = query;
+    nextOffset = 0;
+    totalResults = null;
+    loadedBooks = [];
+    seenBookIds = new Set();
+    isLoadingMore = false;
+    booksContainer.innerHTML = '';
+    paginationStatus.textContent = '';
+
     setStatus('loading', `Cerco libri su “${query}”…`);
     resultCount.textContent = '';
     title.textContent = `Libri su “${query}”`;
 
     try {
-      const books = await adapter.searchBySubject(query, { signal: controller.signal });
-      if (controller.signal.aborted) return;
-      if (!books.length) {
+      const page = await adapter.searchBySubject(query, {
+        limit: PAGE_SIZE,
+        offset: 0,
+        signal: controller.signal,
+      });
+
+      if (controller.signal.aborted || currentQuery !== query) return;
+
+      if (!page.books.length) {
         setStatus('empty', `Nessun libro trovato per “${query}”. Prova una categoria più ampia.`);
         return;
       }
+
+      totalResults = page.total;
+      nextOffset = page.books.length;
+      appendBooks(page.books);
+
       status.hidden = true;
       booksContainer.hidden = false;
-      booksContainer.innerHTML = books.map((book) => bookCard(book, adapter)).join('');
-      resultCount.textContent = `${books.length} ${books.length === 1 ? 'libro' : 'libri'}`;
+      updateResultCount();
+      updatePagination(page.books.length);
     } catch (error) {
       if (error.name !== 'AbortError' && !controller.signal.aborted) {
         setStatus('error', 'Non riesco a contattare la biblioteca. Controlla la connessione e riprova.');
       }
+    }
+  }
+
+  async function loadMore() {
+    if (!currentQuery || isLoadingMore) return;
+
+    isLoadingMore = true;
+    activeSearchController?.abort();
+    activeSearchController = new AbortController();
+    const controller = activeSearchController;
+    const query = currentQuery;
+    const offset = nextOffset;
+
+    loadMoreButton.disabled = true;
+    loadMoreButton.textContent = 'Carico…';
+    paginationStatus.textContent = 'Sto caricando altri libri…';
+
+    try {
+      const page = await adapter.searchBySubject(query, {
+        limit: PAGE_SIZE,
+        offset,
+        signal: controller.signal,
+      });
+
+      if (controller.signal.aborted || currentQuery !== query) return;
+
+      if (page.total !== null) totalResults = page.total;
+      nextOffset += page.books.length;
+
+      const addedCount = appendBooks(page.books);
+      updateResultCount();
+
+      if (!page.books.length) {
+        pagination.hidden = true;
+        paginationStatus.textContent = 'Hai raggiunto la fine dei risultati disponibili.';
+        return;
+      }
+
+      paginationStatus.textContent = addedCount
+        ? `Aggiunti ${addedCount} ${addedCount === 1 ? 'libro' : 'libri'}.`
+        : 'Nessun nuovo libro in questa pagina.';
+
+      updatePagination(page.books.length);
+    } catch (error) {
+      if (error.name !== 'AbortError' && !controller.signal.aborted) {
+        paginationStatus.textContent = 'Non riesco a caricare altri libri. Riprova.';
+        loadMoreButton.disabled = false;
+        loadMoreButton.textContent = 'Riprova';
+      }
+    } finally {
+      if (activeSearchController === controller) isLoadingMore = false;
     }
   }
 
@@ -162,7 +288,6 @@ export function createApp(root, adapter) {
         dialogContent.innerHTML = `<h2 id="dialog-title">Dettaglio non disponibile</h2><p class="description">Non riesco a caricare questo libro. Chiudi la finestra e riprova.</p>`;
       }
     }
-
   }
 
   form.addEventListener('submit', (event) => {
@@ -182,11 +307,13 @@ export function createApp(root, adapter) {
     if (button) showDetails(button.dataset.bookId, button);
   });
 
+  loadMoreButton.addEventListener('click', loadMore);
+
   root.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => activeDetailController?.abort());
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
   });
 
-  return { search, showDetails };
+  return { search, loadMore, showDetails };
 }
