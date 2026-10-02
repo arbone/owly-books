@@ -8,7 +8,7 @@ Note relatore: Owly supporta l'apprendimento nella scuola primaria. Books esplor
 
 ## 2. L'esperienza
 
-L'utente cerca una categoria in inglese, consulta fino a 12 opere con titolo e autori, poi apre la descrizione in una finestra di dettaglio.
+L'utente cerca una categoria in inglese, consulta i risultati con titolo e autori, può caricarne altri progressivamente e apre la descrizione in una finestra di dettaglio.
 
 Note relatore: mostrare una ricerca fantasy. Spiegare che le categorie corrispondono ai soggetti bibliografici di Open Library, non a una ricerca libera per titolo. Le descrizioni restano nella lingua della fonte.
 
@@ -20,15 +20,15 @@ Note relatore: il pattern Adapter evita che la UI dipenda da works, key o dalle 
 
 ## 4. Stati e accessibilità
 
-Caricamento, nessun risultato ed errore hanno messaggi dedicati. Il dialog si chiude con Escape. Le ricerche precedenti vengono annullate e i risultati obsoleti ignorati.
+Caricamento, nessun risultato ed errore hanno messaggi dedicati. Il dialog si chiude con Escape. Le ricerche precedenti vengono annullate e i risultati obsoleti ignorati. “Mostra altri” usa limit/offset senza perdere i libri già caricati.
 
 Note relatore: evidenziare etichetta del campo, area live, fallback per autore e descrizione, riduzione delle animazioni e layout responsive. Non presentare queste scelte come certificazione di conformità.
 
 ## 5. Verifica
 
-11 test automatici con Vitest e jsdom. Build Vite completata. GitHub Actions esegue test e build a ogni push e pull request.
+15 test automatici con Vitest e jsdom. Build Vite completata. GitHub Actions esegue test e build a ogni push e pull request.
 
-Note relatore: mostrare adapter, errori HTTP, rendering, stato vuoto, descrizione mancante, escaping HTML e ordine delle richieste. I test usano risposte simulate per essere ripetibili.
+Note relatore: mostrare adapter, errori HTTP, rendering, stato vuoto, descrizione mancante, escaping HTML, ordine delle richieste, paginazione, deduplica e fine dei risultati. I test usano risposte simulate per essere ripetibili.
 
 ## 6. Codice e pubblicazione
 
