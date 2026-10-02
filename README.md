@@ -5,7 +5,7 @@ Owly Books è una web app didattica che permette di cercare libri per categoria 
 ## Demo e repository
 
 - **Repository GitHub:** [arbone/owly-books](https://github.com/arbone/owly-books)
-- **Demo Vercel:** deploy ancora da completare. La sessione Vercel necessita di rinnovo e il sandbox non ha consentito di salvarla. Non esiste ancora un URL demo verificato.
+- **Demo Vercel:** [owly-books.vercel.app](https://owly-books.vercel.app)
 - **Presentazione:** [PDF di 6 slide](outputs/Owly-Books-presentazione.pdf) e [testi con note relatore](outputs/Presentazione-Owly-Books.md).
 
 ## Funzionalità
@@ -88,7 +88,7 @@ Il progetto usa la configurazione standard di Vite:
 - output directory: `dist`;
 - install command: `npm install`.
 
-Per completare la pubblicazione, accedi a Vercel e importa `arbone/owly-books`, oppure esegui `vercel login` e `vercel --prod` dalla cartella del progetto. Dopo il deploy verifica una ricerca e un dettaglio, poi inserisci l'URL definitivo nel README e nella presentazione. Non commettere token o la directory `.vercel`.
+Il progetto Vercel è collegato al repository `arbone/owly-books`: i push su `main` aggiornano la produzione. Per un deploy manuale esegui `vercel login` e `vercel --prod` dalla cartella del progetto. Non commettere token o la directory `.vercel`.
 
 ## Licenza
 

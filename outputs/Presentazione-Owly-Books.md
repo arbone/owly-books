@@ -34,6 +34,6 @@ Note relatore: mostrare adapter, errori HTTP, rendering, stato vuoto, descrizion
 
 Repository: https://github.com/arbone/owly-books
 
-Deploy: configurazione Vercel pronta. Pubblicazione ancora in attesa del ripristino dell'autenticazione Vercel. Nessun URL demo verificato disponibile.
+Demo Vercel: https://owly-books.vercel.app
 
-Note relatore: aprire il link GitHub cliccabile e mostrare README, codice e test. Una volta completato il deploy, aggiornare questa slide e il README con l'URL verificato.
+Note relatore: aprire la demo ed eseguire una ricerca fantasy, quindi il dettaglio di un libro. Aprire il link GitHub cliccabile e mostrare README, codice e test. Vercel è collegato al repository e aggiorna la produzione con i push su main.
