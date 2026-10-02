@@ -6,6 +6,11 @@ function normalizeDescription(description) {
   return '';
 }
 
+function toNonNegativeInteger(value, fallback = 0) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 export class OpenLibraryAdapter {
   constructor(fetchClient = (...args) => fetch(...args)) {
     this.fetchClient = fetchClient;
@@ -24,19 +29,28 @@ export class OpenLibraryAdapter {
     return response.json();
   }
 
-  async searchBySubject(subject, { limit = 12, signal } = {}) {
+  async searchBySubject(subject, { limit = 12, offset = 0, signal } = {}) {
     const normalizedSubject = subject.trim().toLowerCase().replace(/\s+/g, '_');
+    const safeLimit = Math.min(Math.max(toNonNegativeInteger(limit, 12), 1), 50);
+    const safeOffset = toNonNegativeInteger(offset, 0);
     const data = await this.request(
-      `/subjects/${encodeURIComponent(normalizedSubject)}.json?limit=${limit}`,
+      `/subjects/${encodeURIComponent(normalizedSubject)}.json?limit=${safeLimit}&offset=${safeOffset}`,
       signal,
     );
 
-    return (data.works ?? []).map((work) => ({
+    const books = (data.works ?? []).map((work) => ({
       id: work.key,
       title: work.title || 'Titolo non disponibile',
       authors: (work.authors ?? []).map((author) => author.name).filter(Boolean),
       coverId: work.cover_id ?? null,
     }));
+
+    const parsedTotal = Number(data.work_count);
+
+    return {
+      books,
+      total: Number.isFinite(parsedTotal) ? parsedTotal : null,
+    };
   }
 
   async getBookDetails(workId, { signal } = {}) {
